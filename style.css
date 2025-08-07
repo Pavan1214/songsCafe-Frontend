@@ -1202,3 +1202,19 @@
   color: var(--primary);
 }
 
+.play-favorites-btn {
+  background-color: var(--primary);
+  color: var(--light);
+  padding: 6px 14px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.play-favorites-btn:hover {
+  background-color: var(--secondary);
+  transform: scale(1.05);
+}
