@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SongsCafe</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  
+
 </head>
+
 <body id="house">
   <header>
     <div id="home-filter" class="logo">
@@ -15,8 +17,8 @@
         <i id="home" class="fa-solid fa-house"></i>
       </a>
       <div class="visualizer">
-         <div class="visualizer-bars" id="visualizer"></div>
-       </div>
+        <div class="visualizer-bars" id="visualizer"></div>
+      </div>
     </div>
 
     <div class="header-right">
@@ -31,39 +33,43 @@
     <div class="main-content">
       <div class="main-header">
         <div style="display: flex;align-items: center;justify-content: center;" class="logo">
-      <i class="fas fa-music"></i>
-      <a href="">
-        <h1 style="text-decoration: none;">SongsCafe</h1>
-      </a>
-    </div>
+          <i class="fas fa-music"></i>
+          <a href="">
+            <h1 style="text-decoration: none;">SongsCafe</h1>
+          </a>
+        </div>
         <div id="filter-container">
           <!-- Filters will be added dynamically -->
         </div>
       </div>
-              <h2 class="section-title">
-                <div>
-                  <i class="fas fa-headphones"></i> All Songs 
-                </div>
-                <a style="text-decoration: none; color: white;" href="https://uploader-frontend-ten.vercel.app/">
-                  <div style="border-radius:10px;padding: 2px;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload
-                  </a>
-              </div>
-            </h2>
-      <main id="song-list"></main>
+      <h2 class="section-title">
+        <div>
+          <i class="fas fa-headphones"></i> All Songs
+        </div>
+        <a style="text-decoration: none; color: white;" href="https://uploader-frontend-ten.vercel.app/">
+          <div style="border-radius:10px;padding: 2px;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+        </a>
     </div>
-    
-    <div class="sidebar">
-     
-      
-      <h2 class="section-title"><i class="fas fa-star"></i> Your Favorites</h2>
-      <div class="favorites-container">
-        <div class="favorites-list" id="favorites-list"></div>
-      </div>
-      
-      <h2 class="section-title"><i class="fas fa-fire"></i> Recent Uploads</h2>
-      <div class="top-songs" id="top-songs"></div>
+    </h2>
+    <main id="song-list"></main>
+  </div>
+
+  <div class="sidebar">
+
+
+    <h2 class="section-title"><i class="fas fa-star"></i> Your Favorites</h2>
+    <button id="play-favorites-btn" class="play-favorites-btn">
+      <i class="fas fa-play"></i> Play Favorites
+    </button>
+
+    <div class="favorites-container">
+      <div class="favorites-list" id="favorites-list"></div>
     </div>
+
+    <h2 class="section-title"><i class="fas fa-fire"></i> Recent Uploads</h2>
+    <div class="top-songs" id="top-songs"></div>
+  </div>
   </div>
 
   <div class="player-container">
@@ -78,7 +84,7 @@
           <i class="far fa-heart"></i>
         </button>
       </div>
-      
+
       <div class="player-center">
         <div class="controls">
           <button id="shuffle"><i class="fas fa-random"></i></button>
@@ -93,16 +99,16 @@
           <span id="duration">0:00</span>
         </div>
       </div>
-      
+
       <div class="player-right">
-  <div class="volume-container">
-    <i class="fas fa-volume-up"></i>
-    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
-  </div>
-  <button id="close-mini-player" title="Close Player" class="mini-close-btn">
-    <i class="fas fa-times"></i>
-  </button>
-</div>
+        <div class="volume-container">
+          <i class="fas fa-volume-up"></i>
+          <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+        </div>
+        <button id="close-mini-player" title="Close Player" class="mini-close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
     </div>
   </div>
@@ -114,24 +120,24 @@
         <i class="fas fa-chevron-down"></i>
       </button>
     </div>
-    
+
     <div class="player-main">
       <div class="full-cover">
         <img id="full-player-cover" src="https://placehold.co/300x300/0a1929/fff?text=Cover" alt="Cover">
       </div>
-      
+
       <div class="player-details">
         <h2 id="full-player-title">No Song</h2>
         <p id="full-player-artist">---</p>
       </div>
-      
+
       <div class="player-controls-full">
         <div class="progress1">
           <span id="full-current-time">0:00</span>
           <input type="range" id="full-seekbar" min="0" max="100" value="0">
           <span id="full-duration">0:00</span>
         </div>
-        
+
         <div class="full-controls">
           <button id="full-shuffle"><i class="fas fa-random"></i></button>
           <button id="full-prev"><i class="fas fa-step-backward"></i></button>
@@ -141,25 +147,25 @@
         </div>
       </div>
     </div>
-    
+
     <div class="recommendations">
       <h3 style="font-size: 20px;"><i class="fas fa-fire"></i> You may like</h3>
       <div class="recommendation-grid" id="similar-songs">
         <!-- Similar songs will be populated here -->
       </div>
-      
+
       <h3 style="font-size: 20px;"><i class="fas fa-clock"></i> Recent Uploads</h3>
       <div class="recommendation-grid" id="recent-uploads">
         <!-- Recent uploads will be populated here -->
       </div>
     </div>
   </div>
-  
+
   <div class="copy-rights">
     <h6>@SongsCafe.All rights reserved | Div by Pavan</h6>
   </div>
 
   <script src="script.js"></script>
 </body>
-</html>
 
+</html>
