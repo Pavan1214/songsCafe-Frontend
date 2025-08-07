@@ -220,6 +220,23 @@ function renderFavorites() {
   });
 }
 
+function playFavorites() {
+  const songsToPlay = likedSongs.map(i => allSongs[i]).filter(Boolean);
+  if (songsToPlay.length === 0) {
+    alert("No favorite songs to play.");
+    return;
+  }
+
+  currentSongs = songsToPlay;
+  renderSongList(currentSongs); // ✅ Just render these, don't re-filter.
+  
+  loadAndPlay(0); // Start from the first favorite
+  isLooping = false;
+  isShuffling = false;
+}
+
+
+
 // Create the top songs/recent uploads section
 function createTrendingSection() {
   topSongsContainer.innerHTML = "";
@@ -585,13 +602,19 @@ async function init() {
   };
 
   audio.onended = () => {
-    if (isLooping) {
-      audio.currentTime = 0;
-      audio.play();
-    } else {
+  if (isLooping) {
+    audio.currentTime = 0;
+    audio.play();
+  } else {
+    if (currentIndex < currentSongs.length - 1) {
       nextSong();
+    } else {
+      // Reached last song
+      playBtn.innerHTML = '<i class="fas fa-play"></i>';
+      fullPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
     }
-  };
+  }
+};
 
   volume.oninput = () => {
     audio.volume = volume.value;
@@ -607,6 +630,7 @@ async function init() {
       toggleLike(originalIndex);
     }
   };
+document.getElementById("play-favorites-btn").addEventListener("click", playFavorites);
 
   // Keyboard controls
   document.addEventListener("keydown", e => {
