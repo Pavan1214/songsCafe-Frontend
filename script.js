@@ -628,39 +628,102 @@ function updateVisualizer() {
 }
 
 // ---------------------- Queue feature ----------------------
+// ---- Paste/replace these functions in your script.js ----
+
+// Ensure queue items are unique (by _id/url/title+artist)
+function sanitizeQueue() {
+  if (!Array.isArray(queue)) queue = [];
+  queue = queue.filter((item, index, self) => {
+    return index === self.findIndex(s => {
+      if (s._id && item._id) return s._id === item._id;
+      if (s.url && item.url) return s.url === item.url;
+      return s.title === item.title && s.artist === item.artist;
+    });
+  });
+  localStorage.setItem('queue', JSON.stringify(queue));
+}
+
+/**
+ * Add a song object to queue, preventing duplicates.
+ * Song should be an object with at least one of: _id, url, (title+artist)
+ */
 function addToQueue(song) {
   if (!song) return;
-  queue.push(song);
+  // Check for duplicates robustly
+  const exists = queue.some(q => {
+    if (q._id && song._id) return q._id === song._id;
+    if (q.url && song.url) return q.url === song.url;
+    return q.title === song.title && q.artist === song.artist;
+  });
+
+  if (exists) {
+    showToast(`"${song.title}" is already in the queue`);
+    return;
+  }
+
+  // Add and persist
+  queue.push({
+    _id: song._id,
+    url: song.url,
+    title: song.title,
+    artist: song.artist,
+    cover: song.cover,
+    duration: song.duration
+  });
   localStorage.setItem('queue', JSON.stringify(queue));
   renderQueueUI();
   showToast(`Added "${song.title}" to queue`);
 }
+
 function addToQueueByOriginalIndex(originalIndex) {
   const s = allSongs[originalIndex];
   if (!s) return;
-  // store shallow copy to keep cover/title/url available
   addToQueue({ _id: s._id, title: s.title, artist: s.artist, cover: s.cover, url: s.url, duration: s.duration });
 }
+
+// Updated renderQueueUI: sanitize queue before rendering
 function renderQueueUI() {
   if (!queueListEl) return;
+  // clean duplicates from storage first (one-time cleanup)
+  sanitizeQueue();
+
   queueListEl.innerHTML = '';
-  if (!queue.length) { queueListEl.innerHTML = "<div style='color:#aaa'>No queue yet.</div>"; return; }
+  if (!queue.length) {
+    queueListEl.innerHTML = "<div style='color:#aaa'>No queue yet.</div>";
+    return;
+  }
+
   queue.forEach((s, i) => {
     const div = document.createElement('div');
     div.className = 'queue-item';
-    div.innerHTML = `<img src="${s.cover}" onerror="this.src='https://placehold.co/46x46/0a1929/fff?text=?'"><div style="flex:1"><div style="font-weight:700">${s.title}</div><div style="font-size:12px;color:#9aa6b2">${s.artist}</div></div><div><button class="btn small" data-i="${i}" title="Play this"><i class="fas fa-play"></i></button> <button class="btn small" data-rem="${i}" title="Remove"><i class="fas fa-trash"></i></button></div>`;
+    div.innerHTML = `
+      <img src="${s.cover || 'https://placehold.co/46x46/0a1929/fff?text=?'}" onerror="this.src='https://placehold.co/46x46/0a1929/fff?text=?'">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title}</div>
+        <div style="font-size:12px;color:#9aa6b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.artist || ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn small" data-i="${i}" title="Play this"><i class="fas fa-play"></i></button>
+        <button class="btn small" data-rem="${i}" title="Remove"><i class="fas fa-trash"></i></button>
+      </div>
+    `;
+
     // play specific queue item
     div.querySelector('[data-i]')?.addEventListener('click', () => {
-      // find this song index in allSongs and play from there (switch currentSongs to allSongs to preserve normal flow)
       const idx = allSongs.findIndex(a => a._id === s._id);
       if (idx !== -1) {
         currentSongs = [...allSongs];
         filterAndRenderSongs();
         loadAndPlay(currentSongs.findIndex(a => a._id === s._id));
       } else {
-        showToast("Song not available in library");
+        // fallback: play from queue snapshot
+        const snapshotList = queue.map(q => allSongs.find(a => a._id === q._id) || q).filter(Boolean);
+        currentSongs = snapshotList;
+        renderSongList(currentSongs);
+        loadAndPlay(Math.min(i, currentSongs.length - 1));
       }
     });
+
     // remove from queue
     div.querySelector('[data-rem]')?.addEventListener('click', (e) => {
       const remIdx = parseInt(e.currentTarget.dataset.rem);
@@ -668,9 +731,11 @@ function renderQueueUI() {
       localStorage.setItem('queue', JSON.stringify(queue));
       renderQueueUI();
     });
+
     queueListEl.appendChild(div);
   });
 }
+
 if (clearQueueBtn) {
   clearQueueBtn.addEventListener('click', () => {
     queue = [];
