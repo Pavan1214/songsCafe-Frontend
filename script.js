@@ -1,10 +1,5 @@
-// script.js — SongsCafe with Playlists & Queue (Phase 3 integration)
-// NOTE: This file keeps your original player/filter code and integrates Playlists + Queue.
-// Make sure your HTML includes (optionally) elements with IDs:
-// playlistsList OR playlistsList (container), createPlaylistBtn, queueList, clearQueueBtn, playQueueBtn
-// The script tolerates missing elements (won't crash).
 
-// ---------------------- Existing App State & DOM ----------------------
+
 let allSongs = [];
 let currentSongs = [];
 let currentIndex = null;
