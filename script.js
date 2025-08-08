@@ -920,19 +920,20 @@ async function init() {
     }
   };
 
-  audio.onended = () => {
-    if (isLooping) {
-      audio.currentTime = 0;
-      audio.play();
+audio.onended = () => {
+  if (isLooping) {
+    audio.currentTime = 0;
+    audio.play();
+  } else {
+    if (currentIndex < currentSongs.length - 1) {
+      nextSong();
     } else {
-      if (currentIndex < currentSongs.length - 1) {
-        nextSong();
-      } else {
-        playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        fullPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
-      }
+      // Restart from first song
+      loadAndPlay(0);
     }
-  };
+  }
+};
+
 
   volume.oninput = () => {
     audio.volume = volume.value;
