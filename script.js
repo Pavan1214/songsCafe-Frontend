@@ -1,5 +1,10 @@
+// script.js — SongsCafe with Playlists & Queue (Phase 3 integration)
+// NOTE: This file keeps your original player/filter code and integrates Playlists + Queue.
+// Make sure your HTML includes (optionally) elements with IDs:
+// playlistsList OR playlistsList (container), createPlaylistBtn, queueList, clearQueueBtn, playQueueBtn
+// The script tolerates missing elements (won't crash).
 
-
+// ---------------------- Existing App State & DOM ----------------------
 let allSongs = [];
 let currentSongs = [];
 let currentIndex = null;
@@ -8,6 +13,8 @@ let isLooping = false;
 let likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || [];
 let currentGenre = 'All';
 let currentLanguage = 'All';
+let shuffleHistory = [];
+
 
 // New persistent storages
 let playlists = JSON.parse(localStorage.getItem('playlists')) || []; // { name: 'My List', songs: ['songId1','songId2'] }
@@ -148,18 +155,41 @@ function createCard(song, originalIndex) {
   return card;
 }
 
+
+let songsPerPage = 16;
+let visibleSongs = songsPerPage;
+const loadMoreBtn = document.getElementById('load-more-btn');
+
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener('click', () => {
+    visibleSongs += songsPerPage;
+    renderSongList(currentSongs);
+  });
+}
+
 // ---------------------- Render list ----------------------
 function renderSongList(songsToRender) {
   songList.innerHTML = "";
   if (!songsToRender || songsToRender.length === 0) {
     songList.innerHTML = "<p style='text-align:center;color:#aaa;'>No songs match your filter.</p>";
+    loadMoreBtn.style.display = "none";
     return;
   }
-  songsToRender.forEach(song => {
+
+  // Show only some songs
+  const slice = songsToRender.slice(0, visibleSongs);
+  slice.forEach(song => {
     const originalIndex = allSongs.findIndex(s => s._id === song._id);
     const card = createCard(song, originalIndex);
     songList.appendChild(card);
   });
+
+  // Show or hide Load More button
+  if (visibleSongs < songsToRender.length) {
+    loadMoreBtn.style.display = "inline-block";
+  } else {
+    loadMoreBtn.style.display = "none";
+  }
 }
 
 // ---------------------- Player core (unchanged behavior) ----------------------
@@ -891,14 +921,27 @@ async function init() {
   prevBtn.onclick = prevSong;
 
   shuffleBtn.onclick = () => {
-    isShuffling = !isShuffling;
-    shuffleBtn.style.color = isShuffling ? "var(--secondary)" : "var(--light)";
-  };
+  isShuffling = !isShuffling;
+  if (isShuffling) {
+    // Turn off loop if shuffle is on
+    isLooping = false;
+    loopBtn.style.color = "var(--light)";
+    shuffleHistory = currentIndex !== null ? [currentIndex] : [];
+  }
+  shuffleBtn.style.color = isShuffling ? "var(--secondary)" : "var(--light)";
+};
 
-  loopBtn.onclick = () => {
-    isLooping = !isLooping;
-    loopBtn.style.color = isLooping ? "var(--secondary)" : "var(--light)";
-  };
+loopBtn.onclick = () => {
+  isLooping = !isLooping;
+  if (isLooping) {
+    // Turn off shuffle if loop is on
+    isShuffling = false;
+    shuffleBtn.style.color = "var(--light)";
+    shuffleHistory = [];
+  }
+  loopBtn.style.color = isLooping ? "var(--secondary)" : "var(--light)";
+};
+
 
   seekbar.oninput = () => {
     if (audio.duration) {
@@ -1065,16 +1108,33 @@ function togglePlay() {
     playBtn.innerHTML = '<i class="fas fa-play"></i>';
   }
 }
+
 function nextSong() {
-  if (currentSongs.length === 0) return;
-  let nextIndex;
   if (isShuffling) {
-    nextIndex = Math.floor(Math.random() * currentSongs.length);
+    if (shuffleHistory.length >= currentSongs.length - 1) {
+      // reset after playing all songs
+      shuffleHistory = [currentIndex];
+    }
+
+    let nextIndex;
+    do {
+      nextIndex = Math.floor(Math.random() * currentSongs.length);
+    } while (shuffleHistory.includes(nextIndex) && shuffleHistory.length < currentSongs.length);
+
+    shuffleHistory.push(nextIndex);
+    loadAndPlay(nextIndex);
+
   } else {
-    nextIndex = (currentIndex + 1) % currentSongs.length;
+    // Normal next
+    let nextIndex = currentIndex + 1;
+    if (nextIndex >= currentSongs.length) {
+      if (isLooping) nextIndex = 0;
+      else return;
+    }
+    loadAndPlay(nextIndex);
   }
-  loadAndPlay(nextIndex);
 }
+
 function prevSong() {
   if (currentSongs.length === 0) return;
   let prevIndex = (currentIndex - 1 + currentSongs.length) % currentSongs.length;
